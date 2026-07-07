@@ -1,0 +1,13 @@
+[project]
+name = "data-scraping-sekolah"
+version = "0.1.0"
+description = "Scraper data sekolah (kepala sekolah, telepon, yayasan) berdasarkan NPSN dari data.kemendikdasmen.go.id"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.15.0",
+    "requests>=2.34.2",
+    "selenium>=4.45.0",
+    "webdriver-manager>=4.1.2",
+]

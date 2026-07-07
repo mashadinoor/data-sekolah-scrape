@@ -2,9 +2,9 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
+
+# uv virtual environment (JANGAN commit .venv, tapi uv.lock TETAP di-commit)
 .venv/
-venv/
-env/
 
 # Output hasil scraping (data, bukan kode)
 hasil_sekolah.csv
