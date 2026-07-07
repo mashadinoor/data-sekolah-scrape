@@ -33,31 +33,32 @@ uv sync
 
 ## Cara pakai
 
-1. Siapkan file CSV daftar sekolah Anda, beri nama **`daftar_sekolah.csv`**, letakkan di folder yang sama dengan `scrape_sekolah.py`. Formatnya dipisah `;` (semicolon), dengan header:
+1. Siapkan file CSV daftar sekolah Anda, beri nama **`daftar_sekolah.csv`**, letakkan di folder yang sama dengan `scrape_sekolah.py`. Formatnya dipisah `,` (comma), dengan header:
 
-   ```
-   NO; PROVINSI; KABUPATEN/KOTA; NPSN; SEKOLAH
-   1; JAWA BARAT; KAB. BANDUNG; 20254054; SMAN 1 RANCAEKEK
-   2; JAWA BARAT; KAB. BANDUNG; 20206151; SMAN 1 BALEENDAH
-   ```
+    ```
+    NO, PROVINSI, KABUPATEN/KOTA, NPSN, SEKOLAH
+    ...
+    ```
 
-   Jika nama file atau delimiter Anda beda, sesuaikan variabel `INPUT_CSV` dan `INPUT_DELIMITER` di awal `scrape_sekolah.py`.
+    Jika nama file atau delimiter Anda beda, sesuaikan variabel `INPUT_CSV` dan `INPUT_DELIMITER` di awal `scrape_sekolah.py`.
 
 2. Jalankan:
-   ```bash
-   uv run scrape_sekolah.py
-   ```
-3. Hasil akan tersimpan di `hasil_sekolah.csv` dengan kolom:
-   `no, provinsi, kabupaten_kota, npsn, sekolah, nama_kepala_sekolah, telepon, yayasan, status`
+    ```bash
+    uv run scrape_sekolah.py
+    ```
+3.  Hasil akan tersimpan di `hasil_sekolah.csv` dengan kolom:
+    `no, provinsi, kabupaten_kota, npsn, sekolah, nama_kepala_sekolah, telepon, yayasan, status`
 
-   (kolom asal dari file input digabung dengan data hasil scraping)
+    (kolom asal dari file input digabung dengan data hasil scraping)
 
 ## Struktur Proyek
 
 ```
 npsn-scraper/
 ├── scrape_sekolah.py     # skrip utama
-├── daftar_sekolah.csv    # file input Anda (TIDAK di-commit, lihat .gitignore)
+├── data
+    ├──example.csv        # file input Anda
+    └──hasil-scrape.csv   # file hasil scraping Anda
 ├── pyproject.toml        # metadata proyek & daftar dependensi (dikelola uv)
 ├── uv.lock               # lock file versi dependensi (auto-generated oleh uv)
 ├── LICENSE
