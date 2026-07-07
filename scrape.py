@@ -3,10 +3,14 @@ Scraper data sekolah (nama kepala sekolah, no. telepon, yayasan) berdasarkan NPS
 dari https://sekolah.data.kemendikdasmen.go.id/
 
 Cara pakai:
-    1. pip install selenium webdriver-manager pandas
+    1. uv sync   (atau: pip install selenium webdriver-manager requests beautifulsoup4)
     2. Pastikan Google Chrome terpasang di komputer Anda
-    3. Isi daftar NPSN di variabel DAFTAR_NPSN di bawah (atau baca dari file CSV)
-    4. Jalankan: python scrape_sekolah.py
+    3. Salin "data/example.csv" menjadi file baru di folder "data/" (misal
+       "data/sekolah.csv"), lalu isi dengan data Anda sendiri. Semua *.csv
+       di folder "data/" (kecuali example.csv) akan otomatis dibaca & digabung.
+       Format kolom (dipisah ';'): NO; PROVINSI; KABUPATEN/KOTA; NPSN; SEKOLAH
+    4. Jalankan: uv run scrape_sekolah.py
+    5. Hasil tersimpan di "data/hasil-scrape.csv"
 
 Catatan penting:
     - Situs ini adalah aplikasi Angular (Single Page Application), jadi kontennya
@@ -20,6 +24,8 @@ Catatan penting:
 
 import time
 import csv
+import glob
+import os
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -68,16 +74,89 @@ def ambil_kepala_sekolah(npsn, timeout=10):
     return None, "label 'Kepala Sekolah' tidak ditemukan di halaman"
 
 # -----------------------------------------------------------------------
-# Isi daftar NPSN yang ingin di-scrape di sini
+# Konfigurasi file input & output
 # -----------------------------------------------------------------------
-DAFTAR_NPSN = [
-    "20254054",
-    # tambahkan NPSN lain di sini...
-]
+# Letakkan semua file CSV daftar sekolah Anda di folder "data/".
+# Semua file *.csv di folder ini akan dibaca dan digabung, KECUALI
+# "example.csv" (hanya contoh format) dan file output itu sendiri.
+# Format kolom yang diharapkan (dipisah ','):
+#   NO, PROVINSI, KABUPATEN/KOTA, NPSN, SEKOLAH
+DATA_DIR = "data"
+INPUT_DELIMITER = ","
+FILE_DIKECUALIKAN = {"example.csv"}  # tidak dianggap data asli
 
-OUTPUT_CSV = "hasil_sekolah.csv"
+OUTPUT_CSV = os.path.join(DATA_DIR, "hasil-scrape.csv")
 HEADLESS = True          # set False kalau ingin lihat browser saat proses jalan
 TUNGGU_MAKSIMAL = 15      # detik, waktu tunggu maksimal elemen muncul
+
+
+def cari_file_input(data_dir, dikecualikan):
+    """Cari semua *.csv di data_dir, kecuali nama file yang dikecualikan
+    (termasuk otomatis mengecualikan file output hasil-scrape.csv)."""
+    semua_csv = sorted(glob.glob(os.path.join(data_dir, "*.csv")))
+    nama_output = os.path.basename(OUTPUT_CSV)
+    return [
+        f for f in semua_csv
+        if os.path.basename(f) not in dikecualikan
+        and os.path.basename(f) != nama_output
+    ]
+
+
+def baca_daftar_sekolah(path_csv, delimiter=";"):
+    """
+    Baca satu file CSV input dengan kolom: NO; PROVINSI; KABUPATEN/KOTA; NPSN; SEKOLAH
+    Mengembalikan list of dict, contoh:
+        {"no": "1", "provinsi": "JAWA BARAT", "kabupaten_kota": "KAB. BANDUNG",
+         "npsn": "20254054", "sekolah": "SMAN 1 RANCAEKEK"}
+    """
+    daftar = []
+    with open(path_csv, "r", encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f, delimiter=delimiter)
+        # Normalisasi nama header (hilangkan spasi, ubah jadi lowercase & underscore)
+        # supaya tidak terlalu sensitif terhadap variasi penulisan header.
+        fieldmap = {}
+        for h in reader.fieldnames:
+            key = h.strip().lower()
+            if key == "no":
+                fieldmap[h] = "no"
+            elif "provinsi" in key:
+                fieldmap[h] = "provinsi"
+            elif "kabupaten" in key or "kab" in key:
+                fieldmap[h] = "kabupaten_kota"
+            elif key == "npsn":
+                fieldmap[h] = "npsn"
+            elif "sekolah" in key:
+                fieldmap[h] = "sekolah"
+            else:
+                fieldmap[h] = key
+
+        for row in reader:
+            item = {fieldmap[k]: (v.strip() if v else v) for k, v in row.items()}
+            if item.get("npsn"):
+                daftar.append(item)
+
+    return daftar
+
+
+def baca_semua_input(data_dir, delimiter=";", dikecualikan=None):
+    """Baca dan gabungkan semua file CSV input di data_dir."""
+    dikecualikan = dikecualikan or set()
+    file_list = cari_file_input(data_dir, dikecualikan)
+
+    if not file_list:
+        raise FileNotFoundError(
+            f"Tidak ada file CSV input ditemukan di folder '{data_dir}/'. "
+            f"Salin 'data/example.csv' menjadi file baru (misal 'data/sekolah.csv') "
+            f"lalu isi dengan data Anda."
+        )
+
+    semua = []
+    for path in file_list:
+        baris = baca_daftar_sekolah(path, delimiter=delimiter)
+        print(f"  - {path}: {len(baris)} baris")
+        semua.extend(baris)
+
+    return semua
 
 
 def buat_driver():
@@ -167,12 +246,20 @@ def scrape_satu_npsn(driver, npsn):
 
 
 def main():
+    print(f"Membaca file input dari folder '{DATA_DIR}/' ...")
+    daftar_sekolah = baca_semua_input(
+        DATA_DIR, delimiter=INPUT_DELIMITER, dikecualikan=FILE_DIKECUALIKAN
+    )
+    print(f"Total {len(daftar_sekolah)} baris akan diproses.\n")
+
     driver = buat_driver()
     semua_hasil = []
 
     try:
-        for npsn in DAFTAR_NPSN:
-            print(f"Memproses NPSN {npsn} ...")
+        for item in daftar_sekolah:
+            npsn = item["npsn"]
+            nama_sekolah = item.get("sekolah", "")
+            print(f"Memproses NPSN {npsn} ({nama_sekolah}) ...")
 
             # 1) Ambil telepon & yayasan via Selenium (situs Angular)
             hasil = scrape_satu_npsn(driver, npsn)
@@ -183,16 +270,34 @@ def main():
             if nama_kepsek is None:
                 hasil["status"] += f" | kepsek: {status_kepsek}"
 
-            print(f"  -> {hasil}")
-            semua_hasil.append(hasil)
+            # 3) Gabungkan dengan kolom asal dari file input
+            baris_akhir = {
+                "no": item.get("no", ""),
+                "provinsi": item.get("provinsi", ""),
+                "kabupaten_kota": item.get("kabupaten_kota", ""),
+                "npsn": npsn,
+                "sekolah": nama_sekolah,
+                "nama_kepala_sekolah": hasil["nama_kepala_sekolah"],
+                "telepon": hasil["telepon"],
+                "yayasan": hasil["yayasan"],
+                "status": hasil["status"],
+            }
+
+            print(f"  -> {baris_akhir}")
+            semua_hasil.append(baris_akhir)
             time.sleep(2)  # jeda antar-NPSN, sopan ke server
     finally:
         driver.quit()
 
     # simpan ke CSV
+    os.makedirs(os.path.dirname(OUTPUT_CSV) or ".", exist_ok=True)
     with open(OUTPUT_CSV, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(
-            f, fieldnames=["npsn", "nama_kepala_sekolah", "telepon", "yayasan", "status"]
+            f,
+            fieldnames=[
+                "no", "provinsi", "kabupaten_kota", "npsn", "sekolah",
+                "nama_kepala_sekolah", "telepon", "yayasan", "status",
+            ],
         )
         writer.writeheader()
         writer.writerows(semua_hasil)

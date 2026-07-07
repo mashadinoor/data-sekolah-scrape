@@ -6,9 +6,10 @@ __pycache__/
 # uv virtual environment (JANGAN commit .venv, tapi uv.lock TETAP di-commit)
 .venv/
 
-# Output hasil scraping (data, bukan kode)
-hasil_sekolah.csv
-*.csv
+# Data asli & hasil scraping (bisa berisi data sensitif / besar)
+# Kecualikan example.csv supaya tetap ter-commit sebagai contoh format (seperti .env.example)
+data/*.csv
+!data/example.csv
 
 # VS Code
 .vscode/

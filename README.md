@@ -18,6 +18,7 @@ Hasil disimpan ke file CSV.
 ## Prasyarat
 
 - Python 3.9+
+- [uv](https://docs.astral.sh/uv/) — package & environment manager Python
 - Google Chrome terpasang di komputer
 
 ## Instalasi
@@ -25,34 +26,40 @@ Hasil disimpan ke file CSV.
 ```bash
 git clone https://github.com/<username-anda>/npsn-scraper.git
 cd npsn-scraper
-python -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+uv sync
 ```
+
+`uv sync` otomatis membuat virtual environment `.venv` dan menginstal semua dependensi sesuai `pyproject.toml` / `uv.lock`.
 
 ## Cara pakai
 
-1. Buka `scrape_sekolah.py`
-2. Isi daftar NPSN yang ingin dicari pada variabel `DAFTAR_NPSN`:
-   ```python
-   DAFTAR_NPSN = [
-       "20254054",
-       "20254055",
-   ]
+1. Siapkan file CSV daftar sekolah Anda, beri nama **`daftar_sekolah.csv`**, letakkan di folder yang sama dengan `scrape_sekolah.py`. Formatnya dipisah `;` (semicolon), dengan header:
+
    ```
-3. Jalankan:
+   NO; PROVINSI; KABUPATEN/KOTA; NPSN; SEKOLAH
+   1; JAWA BARAT; KAB. BANDUNG; 20254054; SMAN 1 RANCAEKEK
+   2; JAWA BARAT; KAB. BANDUNG; 20206151; SMAN 1 BALEENDAH
+   ```
+
+   Jika nama file atau delimiter Anda beda, sesuaikan variabel `INPUT_CSV` dan `INPUT_DELIMITER` di awal `scrape_sekolah.py`.
+
+2. Jalankan:
    ```bash
-   python scrape_sekolah.py
+   uv run scrape_sekolah.py
    ```
-4. Hasil akan tersimpan di `hasil_sekolah.csv` dengan kolom:
-   `npsn, nama_kepala_sekolah, telepon, yayasan, status`
+3. Hasil akan tersimpan di `hasil_sekolah.csv` dengan kolom:
+   `no, provinsi, kabupaten_kota, npsn, sekolah, nama_kepala_sekolah, telepon, yayasan, status`
+
+   (kolom asal dari file input digabung dengan data hasil scraping)
 
 ## Struktur Proyek
 
 ```
 npsn-scraper/
 ├── scrape_sekolah.py     # skrip utama
-├── requirements.txt      # daftar dependensi
+├── daftar_sekolah.csv    # file input Anda (TIDAK di-commit, lihat .gitignore)
+├── pyproject.toml        # metadata proyek & daftar dependensi (dikelola uv)
+├── uv.lock               # lock file versi dependensi (auto-generated oleh uv)
 ├── LICENSE
 ├── README.md
 └── .gitignore
