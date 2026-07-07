@@ -1,4 +1,4 @@
-# npsn-scraper
+# Data Scraping Sekolah (by NPSN)
 
 Skrip Python untuk mengambil data sekolah (nama kepala sekolah, nomor telepon, dan nama yayasan) berdasarkan **NPSN** dari dua sumber data publik Kementerian Pendidikan:
 
