@@ -51,11 +51,33 @@ uv sync
 
     (kolom asal dari file input digabung dengan data hasil scraping)
 
+## Menjalankan di Google Colab
+
+Selain di komputer lokal, skrip ini juga bisa dijalankan langsung di Google Colab lewat notebook `scrape_colab.ipynb` — cocok kalau kamu tidak mau install Python/Chrome di komputer sendiri, atau mau menjalankan scraping dari HP/Chromebook.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/<username-anda>/npsn-scraper/blob/main/scrape_colab.ipynb)
+
+Perbedaan utama dari versi lokal:
+
+- **Chrome & chromedriver** di-install otomatis lewat `apt-get` di cell pertama notebook (Colab tidak punya Chrome bawaan seperti laptop kamu).
+- **Input CSV** diupload langsung lewat cell "Upload file input" (pakai widget upload bawaan Colab), bukan diletakkan manual di folder `data/`.
+- **Hasil scraping** diunduh otomatis lewat cell terakhir (`files.download(...)`), karena file di Colab akan hilang begitu runtime disconnect/restart.
+
+Cara pakai singkat:
+
+1. Buka `scrape_colab.ipynb` di Google Colab (klik badge di atas, atau upload manual filenya ke [colab.research.google.com](https://colab.research.google.com/)).
+2. Jalankan cell demi cell dari atas ke bawah (Runtime → Run all juga bisa).
+3. Saat diminta upload, pilih file CSV daftar sekolah kamu (format kolom sama seperti versi lokal: `NO, PROVINSI, KABUPATEN/KOTA, NPSN, SEKOLAH`).
+4. Tunggu proses scraping selesai, lalu file `hasil-scrape.csv` akan otomatis terunduh ke komputer/HP kamu.
+
+> Opsional: kalau mau hasilnya tersimpan permanen (tidak hilang saat sesi Colab berakhir) atau mau menjalankan scraping berkali-kali tanpa upload ulang, notebook menyediakan opsi mount Google Drive — tinggal uncomment 2 baris kode di bagian awal notebook.
+
 ## Struktur Proyek
 
 ```
 npsn-scraper/
-├── scrape_sekolah.py     # skrip utama
+├── scrape_sekolah.py     # skrip utama (jalan di komputer lokal)
+├── scrape_colab.ipynb    # versi siap-pakai untuk Google Colab
 ├── data
     ├──example.csv        # file input Anda
     └──hasil-scrape.csv   # file hasil scraping Anda
