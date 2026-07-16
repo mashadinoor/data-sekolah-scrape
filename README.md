@@ -65,7 +65,7 @@ Perbedaan utama dari versi lokal:
 
 Cara pakai singkat:
 
-1. Buka `scrape_colab.ipynb` di Google Colab (klik badge di atas, atau upload manual filenya ke [colab.research.google.com](https://colab.research.google.com/)).
+1. Buka `scrape_colab.ipynb` di Google Colab (klik badge di atas, atau upload manual filenya ke [colab.research.google.com](https://colab.research.google.com/drive/1G5x4RBpuvuxf6S1XHB-4HcYD8IOhhasG?usp=sharing)).
 2. Jalankan cell demi cell dari atas ke bawah (Runtime → Run all juga bisa).
 3. Saat diminta upload, pilih file CSV daftar sekolah kamu (format kolom sama seperti versi lokal: `NO, PROVINSI, KABUPATEN/KOTA, NPSN, SEKOLAH`).
 4. Tunggu proses scraping selesai, lalu file `hasil-scrape.csv` akan otomatis terunduh ke komputer/HP kamu.
